@@ -2,18 +2,38 @@ import { NextResponse } from "next/server";
 import type { NextRequest } from "next/server";
 
 export function middleware(req: NextRequest) {
-  const host = req.headers.get("host") || "";
+  const hostname = req.headers.get("host")?.split(":")[0] || "";
 
-  const subdomain = host.split(".")[0];
+  const url = req.nextUrl.clone();
 
-  // Ignore main domain
-  if (subdomain === "www" || subdomain === "growcad") {
-    return NextResponse.next();
+  // 🌐 ROOT → MARKETING
+  if (hostname === "growcad.in" || hostname === "www.growcad.in") {
+    url.pathname = "/home";
+    return NextResponse.rewrite(url);
   }
 
-  const res = NextResponse.next();
+  // 🚀 APP
+  if (hostname === "app.growcad.in") {
+    url.pathname = "/dashboard";
+    return NextResponse.rewrite(url);
+  }
 
-  res.headers.set("x-tenant", subdomain);
+  // 👑 SUPERADMIN
+  if (hostname === "superadmin.growcad.in") {
+    url.pathname = "/admin";
+    return NextResponse.rewrite(url);
+  }
 
-  return res;
+  // 🏫 TENANT
+  const subdomain = hostname.split(".")[0];
+
+  if (
+    subdomain &&
+    !["www", "growcad", "app", "superadmin"].includes(subdomain)
+  ) {
+    url.pathname = `/tenant/${subdomain}`;
+    return NextResponse.rewrite(url);
+  }
+
+  return NextResponse.next();
 }
