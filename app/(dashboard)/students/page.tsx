@@ -10,7 +10,6 @@ import {
 } from "@/modules/student/api";
 import { queryClient } from "@/lib/query-client";
 import Button from "@/components/ui/Button";
-import { FixedSizeList as List } from "react-window";
 import { useDebounce } from "use-debounce";
 import {
   LoadingState,
@@ -153,25 +152,12 @@ export default function StudentsPage() {
         className="p-2 mb-4 border border-white/10 rounded-xl bg-white/5 w-full"
       />
 
-      {/* 🔥 VIRTUAL LIST (PERFORMANCE) */}
-      <List
-        height={400}
-        itemCount={students.length}
-        itemSize={60}
-        width="100%"
-      >
-        {({
-          index,
-          style,
-        }: {
-          index: number;
-          style: React.CSSProperties;
-        }) => (
-          <div style={style}>
-            <StudentItem s={students[index]} />
-          </div>
-        )}
-      </List>
+      {/* 🔥 SIMPLE LIST (NO VIRTUALIZATION) */}
+      <div className="space-y-2 max-h-[400px] overflow-y-auto">
+        {students.map((s) => (
+          <StudentItem key={s.id} s={s} />
+        ))}
+      </div>
 
     </div>
   );
