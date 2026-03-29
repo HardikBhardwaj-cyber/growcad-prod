@@ -1,26 +1,74 @@
-@import "tailwindcss";
+@import "tailwindcss/preflight";
+@import "tailwindcss/utilities";
 
+/* 🔥 ROOT DESIGN TOKENS */
 :root {
-  --background: #ffffff;
-  --foreground: #171717;
+  --bg-primary: #0a0a0f;
+  --bg-secondary: #0f172a;
+
+  --color-primary: #7c3aed;
+  --color-secondary: #3b82f6;
+
+  --text-primary: #ffffff;
+  --text-secondary: #94a3b8;
+
+  --border-color: rgba(255, 255, 255, 0.08);
+
+  --radius: 16px;
+
+  --shadow-glow: 0 0 40px rgba(124, 58, 237, 0.35);
 }
 
-@theme inline {
-  --color-background: var(--background);
-  --color-foreground: var(--foreground);
-  --font-sans: var(--font-geist-sans);
-  --font-mono: var(--font-geist-mono);
-}
-
-@media (prefers-color-scheme: dark) {
-  :root {
-    --background: #0a0a0a;
-    --foreground: #ededed;
-  }
-}
+/* 🔥 GLOBAL BASE */
 
 body {
-  background: var(--background);
-  color: var(--foreground);
-  font-family: Arial, Helvetica, sans-serif;
+  background: radial-gradient(
+    circle at top,
+    rgba(124, 58, 237, 0.15),
+    black
+  );
 }
+
+/* 🔥 GRADIENT TEXT */
+
+.gradient-text {
+  background: linear-gradient(90deg, #7c3aed, #3b82f6);
+
+  /* ✅ standard */
+  background-clip: text;
+
+  /* ✅ safari support */
+  -webkit-background-clip: text;
+  -webkit-text-fill-color: transparent;
+}
+
+/* 🔥 GLASS EFFECT */
+
+.glass {
+  background: rgba(255, 255, 255, 0.05);
+  backdrop-filter: blur(20px);
+  border: 1px solid var(--border-color);
+}
+
+/* 🔥 GLOW */
+
+.glow {
+  box-shadow: var(--shadow-glow);
+}
+
+/* 🔥 SCROLL */
+
+::-webkit-scrollbar {
+  width: 6px;
+}
+::-webkit-scrollbar-thumb {
+  background: #1e293b;
+  border-radius: 10px;
+}
+
+html {
+  scroll-behavior: smooth;
+}
+
+
+
