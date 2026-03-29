@@ -1,11 +1,3 @@
-"use client";
-
-import { useEffect } from "react";
-
-export default function Home() {
-  useEffect(() => {
-    window.location.href = "/";
-  }, []);
-
+export default function Page() {
   return null;
 }
