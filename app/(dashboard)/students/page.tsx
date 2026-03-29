@@ -1,0 +1,178 @@
+"use client";
+
+import { useState, memo } from "react";
+import { useQuery, useMutation } from "@tanstack/react-query";
+import {
+  getStudents,
+  createStudent,
+  Student,
+  CreateStudentInput,
+} from "@/modules/student/api";
+import { queryClient } from "@/lib/query-client";
+import Button from "@/components/ui/Button";
+import { FixedSizeList as List } from "react-window";
+import { useDebounce } from "use-debounce";
+import {
+  LoadingState,
+  ErrorState,
+  EmptyState,
+} from "@/components/shared/State";
+import toast from "react-hot-toast";
+
+// ✅ MEMO COMPONENT (PERFORMANCE)
+const StudentItem = memo(({ s }: { s: Student }) => {
+  return (
+    <div className="p-3 border border-white/10 rounded-xl flex justify-between bg-white/5">
+      <span>{s.name}</span>
+      <span className="text-sm text-gray-400">{s.phone}</span>
+    </div>
+  );
+});
+StudentItem.displayName = "StudentItem";
+
+export default function StudentsPage() {
+  const [name, setName] = useState("");
+  const [phone, setPhone] = useState("");
+  const [search, setSearch] = useState("");
+
+  const [debouncedSearch] = useDebounce(search, 500);
+
+  // ✅ QUERY (TYPE SAFE)
+  const { data, isLoading, error } = useQuery<Student[]>({
+    queryKey: ["students"],
+    queryFn: getStudents,
+  });
+
+  // ✅ MUTATION (CORRECT + OPTIMISTIC UI)
+  const mutation = useMutation({
+    mutationFn: createStudent,
+
+    onMutate: async (newStudent: CreateStudentInput) => {
+      await queryClient.cancelQueries({ queryKey: ["students"] });
+
+      const prev = queryClient.getQueryData<Student[]>(["students"]);
+
+      queryClient.setQueryData<Student[]>(
+        ["students"],
+        (old = []) => [
+          ...old,
+          {
+            id: "temp-" + Date.now(),
+            ...newStudent,
+          },
+        ]
+      );
+
+      return { prev };
+    },
+
+    onError: (_err, _new, context) => {
+      if (context?.prev) {
+        queryClient.setQueryData(["students"], context.prev);
+      }
+      toast.error("Failed to add student");
+    },
+
+    onSuccess: () => {
+      toast.success("Student added");
+      setName("");
+      setPhone("");
+    },
+
+    onSettled: () => {
+      queryClient.invalidateQueries({ queryKey: ["students"] });
+    },
+  });
+
+  // ✅ STATES
+  if (isLoading) return <LoadingState />;
+  if (error) return <ErrorState />;
+
+  // ✅ FILTER + SEARCH
+  const students =
+    data?.filter((s) =>
+      s.name.toLowerCase().includes(debouncedSearch.toLowerCase())
+    ) ?? [];
+
+  if (!students.length)
+    return <EmptyState text="No students yet" />;
+
+  // ✅ ADD HANDLER
+  const handleAdd = () => {
+    if (!name.trim()) {
+      toast.error("Name required");
+      return;
+    }
+
+    if (!phone.match(/^[0-9]{10}$/)) {
+      toast.error("Invalid phone");
+      return;
+    }
+
+    mutation.mutate({
+      name,
+      phone,
+      email: "", // 🔥 can replace with input later
+      course: "general", // 🔥 can replace with dropdown later
+    });
+  };
+
+  return (
+    <div className="p-4 md:p-6">
+
+      {/* 🔥 ADD STUDENT */}
+      <div className="flex flex-col md:flex-row gap-2 mb-4">
+        <input
+          value={name}
+          onChange={(e) => setName(e.target.value)}
+          placeholder="Name"
+          className="p-2 border border-white/10 rounded-xl bg-white/5 w-full"
+        />
+
+        <input
+          type="tel"
+          value={phone}
+          onChange={(e) => setPhone(e.target.value)}
+          placeholder="Phone"
+          className="p-2 border border-white/10 rounded-xl bg-white/5 w-full"
+        />
+
+        <Button
+          loading={mutation.isPending}
+          onClick={handleAdd}
+        >
+          Add
+        </Button>
+      </div>
+
+      {/* 🔥 SEARCH */}
+      <input
+        placeholder="Search student..."
+        value={search}
+        onChange={(e) => setSearch(e.target.value)}
+        className="p-2 mb-4 border border-white/10 rounded-xl bg-white/5 w-full"
+      />
+
+      {/* 🔥 VIRTUAL LIST (PERFORMANCE) */}
+      <List
+        height={400}
+        itemCount={students.length}
+        itemSize={60}
+        width="100%"
+      >
+        {({
+          index,
+          style,
+        }: {
+          index: number;
+          style: React.CSSProperties;
+        }) => (
+          <div style={style}>
+            <StudentItem s={students[index]} />
+          </div>
+        )}
+      </List>
+
+    </div>
+  );
+}
