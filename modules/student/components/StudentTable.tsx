@@ -4,7 +4,7 @@ import { useState } from "react";
 import { useStudents } from "../hooks/useStudents";
 import { StudentCard } from "./StudentCard";
 import Input from "@/components/ui/Input";
-import Skeleton from "@/components/ui/Skeleton"; // ✅ FIXED
+import Skeleton from "@/components/ui/skeleton"; // ✅ FIXED
 
 // ✅ TYPE
 type Student = {
