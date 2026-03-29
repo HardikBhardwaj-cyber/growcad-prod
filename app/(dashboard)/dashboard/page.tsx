@@ -9,6 +9,14 @@ import { useAuthGuard } from "@/hooks/useAuthGuard";
 import { useOnlineStatus } from "@/hooks/useOnlineStatus";
 import { motion } from "framer-motion";
 
+// ✅ TYPE
+type DashboardStats = {
+  total_students: number;
+  revenue: number;
+  pending: number;
+  attendance: number;
+};
+
 // 🔥 Lazy load Card
 const Card = dynamic(() => import("@/components/ui/card"));
 
@@ -17,11 +25,12 @@ export default function DashboardPage() {
 
   const online = useOnlineStatus();
 
-  const { data, isLoading, error } = useQuery({
+  const { data, isLoading, error } = useQuery<DashboardStats>({
     queryKey: ["dashboard"],
     queryFn: getDashboard,
   });
 
+  // ❌ Offline
   if (!online) {
     return (
       <div className="p-6 text-center text-yellow-400">
@@ -30,11 +39,21 @@ export default function DashboardPage() {
     );
   }
 
+  // ⏳ Loading
   if (isLoading) return <DashboardSkeleton />;
+
+  // ❌ Error
   if (error) return <ErrorState />;
 
-  const stats = data?.data || {};
+  // ✅ SAFE DATA (FIXED)
+  const stats: DashboardStats = data || {
+    total_students: 0,
+    revenue: 0,
+    pending: 0,
+    attendance: 0,
+  };
 
+  // 🔥 Cards
   const cards = [
     { label: "Students", value: stats.total_students },
     { label: "Revenue", value: `₹${stats.revenue}` },

@@ -1,41 +1,21 @@
 import { api } from "@/lib/api";
 
-// ✅ TYPES
-export type Tenant = {
-  id: string;
-  name: string;
-  email: string;
-  status: "active" | "inactive";
-};
-
+// ✅ TYPE
 export type AdminStats = {
-  total_tenants: number;
-  total_students: number;
+  tenants: number;
   revenue: number;
+  active_users: number;
+  growth: number;
 };
 
-export type UpdateTenantInput = {
-  name?: string;
-  email?: string;
-  status?: "active" | "inactive";
+// ✅ RESPONSE TYPE (if backend wraps)
+type AdminResponse = {
+  data: AdminStats;
 };
 
-// ✅ API FUNCTIONS
+// ✅ API FUNCTION (FIXED)
+export const getAdminStats = async (): Promise<AdminStats> => {
+  const res = await api.get<AdminResponse>("/admin/stats");
 
-// Get all tenants
-export const getTenants = async () => {
-  const res = await api.get<Tenant[]>("/admin/tenants");
-  return res.data;
-};
-
-// Update tenant
-export const updateTenant = async (id: string, data: UpdateTenantInput) => {
-  const res = await api.put<Tenant>(`/admin/tenant/${id}`, data);
-  return res.data;
-};
-
-// Admin dashboard stats
-export const getAdminStats = async () => {
-  const res = await api.get<AdminStats>("/admin/stats");
-  return res.data;
+  return res.data.data; // 🔥 unwrap properly
 };

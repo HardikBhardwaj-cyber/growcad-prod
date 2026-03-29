@@ -31,8 +31,8 @@ export default function LoginPage() {
 
       const res = await verifyOTP(phone, otp);
 
-      localStorage.setItem("access_token", res.data.token);
-      setAuth(res.data.user, res.data.token);
+      localStorage.setItem("access_token", res.token);
+      setAuth(res.user, res.token);
 
       window.location.href = "/onboarding";
     } catch {
