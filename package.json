@@ -6,7 +6,8 @@
     "dev": "next dev",
     "build": "next build",
     "start": "next start",
-    "lint": "eslint"
+    "lint": "eslint",
+    "postinstall": "tailwindcss -i ./app/globals.css -o ./app/output.css"
   },
   "dependencies": {
     "@tanstack/react-query": "^5.95.2",
