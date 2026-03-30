@@ -22,7 +22,6 @@
     "react-hot-toast": "^2.6.0",
     "react-window": "^2.2.7",
     "recharts": "^3.8.1",
-    "tailwind": "^4.0.0",
     "tailwindcss": "^4.2.2",
     "use-debounce": "^10.1.0",
     "zustand": "^5.0.12"
